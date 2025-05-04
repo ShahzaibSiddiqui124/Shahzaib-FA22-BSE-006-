@@ -1,16 +1,4 @@
 # bmi_final1
+![WhatsApp Image 2025-05-04 at 23 50 24_d6521f57](https://github.com/user-attachments/assets/ada4dc1c-f465-4aac-9885-57f4e644c75d)
+![WhatsApp Image 2025-05-04 at 23 50 24_18729455](https://github.com/user-attachments/assets/0372be46-3c7d-4ad1-9b98-d609cf7f6527)
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
