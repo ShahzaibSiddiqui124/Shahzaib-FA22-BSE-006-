@@ -1,16 +1,3 @@
 # mongodb1
+![WhatsApp Image 2025-05-08 at 12 07 12_f6d0f2d2](https://github.com/user-attachments/assets/bb378e40-e971-45c6-bb4f-6daa5415b299)
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
