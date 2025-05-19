@@ -1,4 +1,4 @@
-name: studentapp
+name: admin
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -31,8 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   supabase_flutter: ^2.9.0
-  shared_preferences_android: ^2.4.10
-  url_launcher_android: ^6.3.16
+  lottie: ^3.3.1
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -60,6 +60,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/Animation - 1747651382157.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:
