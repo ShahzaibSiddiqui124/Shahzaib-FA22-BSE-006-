@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'supabase_config.dart';
 import 'welcome_page.dart';
 import 'admin_dashboard.dart';
+import 'assignments_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,8 +21,29 @@ class AdminApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.grey[50],
         textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontFamily: 'Roboto'),
-          headlineSmall: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.bold),
+          bodyMedium: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 16,
+            letterSpacing: 0, // Ensure no extra spacing between characters
+          ),
+          bodyLarge: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 18,
+            letterSpacing: 0,
+          ),
+          titleLarge: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0,
+          ),
+          headlineSmall: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0,
+          ),
+        ).apply(
+          fontFamily: 'Roboto', // Fallback to ensure all text uses Roboto
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -37,6 +59,7 @@ class AdminApp extends StatelessWidget {
       home: const WelcomePage(),
       routes: {
         '/dashboard': (context) => const AdminDashboard(),
+        '/assignments': (context) => const AssignmentsPage(),
       },
     );
   }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' show Platform;
 import 'supabase_config.dart';
+import 'assignments_page.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -22,7 +23,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   final _marksController = TextEditingController();
   final _avatarController = TextEditingController();
   final _assignmentTitleController = TextEditingController();
-  File? _selectedFile;
+  PlatformFile? _selectedFile;
   bool _isUploading = false;
 
   @override
@@ -41,14 +42,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
         return (value as List).map((item) {
           return {
             'id': item['id'],
-            'name': item['name'] ?? 'Unknown',
+            'name': item['name']?.toString() ?? 'Unknown',
             'attendance': item['attendance'] ?? 0,
             'marks': item['marks'] ?? 0,
-            'avatar_url': item['avatar_url'] ?? 'https://via.placeholder.com/150',
+            'avatar_url': item['avatar_url']?.toString() ?? 'https://via.placeholder.com/150',
           };
         }).toList();
       });
     } catch (e) {
+      print('Error loading data: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading data: $e')),
@@ -64,6 +66,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/');
     } catch (e) {
+      print('Error logging out: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error logging out: $e')),
@@ -147,10 +150,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
               if (_formKey.currentState!.validate()) {
                 try {
                   await supabase.from('students').insert({
-                    'name': _nameController.text,
+                    'name': _nameController.text.trim(),
                     'attendance': int.parse(_attendanceController.text),
                     'marks': int.parse(_marksController.text),
-                    'avatar_url': _avatarController.text.isEmpty ? 'https://via.placeholder.com/150' : _avatarController.text,
+                    'avatar_url': _avatarController.text.isEmpty ? 'https://via.placeholder.com/150' : _avatarController.text.trim(),
                   });
                   _nameController.clear();
                   _attendanceController.clear();
@@ -165,9 +168,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     const SnackBar(content: Text('Student added successfully')),
                   );
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error adding student: $e')),
-                  );
+                  print('Error adding student: $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error adding student: $e')),
+                    );
+                  }
                 }
               }
             },
@@ -257,10 +263,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
               if (_formKey.currentState!.validate()) {
                 try {
                   await supabase.from('students').update({
-                    'name': _nameController.text,
+                    'name': _nameController.text.trim(),
                     'attendance': int.parse(_attendanceController.text),
                     'marks': int.parse(_marksController.text),
-                    'avatar_url': _avatarController.text.isEmpty ? 'https://via.placeholder.com/150' : _avatarController.text,
+                    'avatar_url': _avatarController.text.isEmpty ? 'https://via.placeholder.com/150' : _avatarController.text.trim(),
                   }).eq('id', student['id']);
                   _nameController.clear();
                   _attendanceController.clear();
@@ -275,9 +281,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     const SnackBar(content: Text('Student updated successfully')),
                   );
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error updating student: $e')),
-                  );
+                  print('Error updating student: $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error updating student: $e')),
+                    );
+                  }
                 }
               }
             },
@@ -317,9 +326,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   const SnackBar(content: Text('Student deleted successfully')),
                 );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error deleting student: $e')),
-                );
+                print('Error deleting student: $e');
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error deleting student: $e')),
+                  );
+                }
               }
             },
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
@@ -329,151 +341,218 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+  Future<bool> _checkAndRequestStoragePermission() async {
+    if (Platform.isAndroid) {
+      PermissionStatus status = await Permission.storage.status;
+      print('Initial permission status: $status');
+
+      if (status.isDenied || status.isPermanentlyDenied) {
+        status = await Permission.storage.request();
+        print('After request permission status: $status');
+        if (status.isDenied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Storage permission denied. Please allow access.'),
+                action: SnackBarAction(
+                  label: 'Retry',
+                  onPressed: _checkAndRequestStoragePermission,
+                ),
+              ),
+            );
+          }
+          return false;
+        }
+        if (status.isPermanentlyDenied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Permission permanently denied. Please enable it in settings.'),
+                action: SnackBarAction(
+                  label: 'Settings',
+                  onPressed: _openAppSettings,
+                ),
+              ),
+            );
+          }
+          return false;
+        }
+      }
+      return status.isGranted;
+    }
+    return true;
+  }
+
   Future<void> _uploadAssignment(int studentId) async {
+    if (_isUploading) return;
+
     try {
       setState(() {
         _isUploading = true;
       });
 
-      // Request storage permissions for Android
-      bool permissionGranted = true;
-      if (Platform.isAndroid) {
-        final status = await Permission.storage.request();
-        if (!status.isGranted) {
-          permissionGranted = false;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Storage permission denied')),
-          );
-        }
-      }
-
-      if (!permissionGranted) {
+      if (_selectedFile == null) {
         setState(() {
           _isUploading = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No file selected. Please select a file to upload.')),
+        );
         return;
       }
 
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'png'],
-      );
-
-      if (result != null) {
-        File file = File(result.files.single.path!);
-        String fileName = result.files.single.name;
-        final String path = 'assignments/$studentId/${DateTime.now().millisecondsSinceEpoch}_$fileName';
-
-        // Upload file to Supabase storage
-        await supabase.storage.from('assignments').upload(path, file);
-
-        // Get the public URL
-        final String fileUrl = supabase.storage.from('assignments').getPublicUrl(path);
-
-        // Save assignment details to database
-        await supabase.from('assignments').insert({
-          'student_id': studentId,
-          'title': _assignmentTitleController.text,
-          'file_url': fileUrl,
-          'file_name': fileName,
-        });
-
-        _assignmentTitleController.clear();
+      if (_selectedFile!.bytes == null) {
         setState(() {
-          _selectedFile = null;
           _isUploading = false;
-          _loadData();
         });
-
-        if (!mounted) return;
-        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Assignment uploaded successfully')),
+          const SnackBar(content: Text('Selected file has no data. Please try another file.')),
         );
-      } else {
-        setState(() {
-          _isUploading = false;
-        });
+        return;
       }
+
+      final String fileName = _selectedFile!.name;
+      final String path = 'assignments/$studentId/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+
+      print('Uploading file: $fileName, path: $path, bytes length: ${_selectedFile!.bytes!.length}');
+
+      final response = await supabase.storage.from('assignments').uploadBinary(
+        path,
+        _selectedFile!.bytes!,
+        fileOptions: FileOptions(contentType: _selectedFile!.extension),
+      );
+      print('Upload response: $response');
+
+      final String fileUrl = supabase.storage.from('assignments').getPublicUrl(path);
+      print('Public URL: $fileUrl');
+
+      await supabase.from('assignments').insert({
+        'student_id': studentId,
+        'title': _assignmentTitleController.text.trim(),
+        'file_url': fileUrl,
+        'file_name': fileName,
+      });
+
+      _assignmentTitleController.clear();
+      setState(() {
+        _selectedFile = null;
+        _isUploading = false;
+        _loadData();
+      });
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Assignment uploaded successfully')),
+      );
     } catch (e) {
       setState(() {
         _isUploading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading assignment: $e')),
-      );
+      print('Upload error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error uploading assignment: $e')),
+        );
+      }
     }
   }
 
   void _showAssignmentDialog(int studentId) {
     _assignmentTitleController.clear();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Upload Assignment', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _assignmentTitleController,
-                decoration: InputDecoration(
-                  labelText: 'Assignment Title',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    setState(() {
+      _selectedFile = null;
+    });
+
+    // Request storage permission proactively
+    _checkAndRequestStoragePermission().then((hasPermission) {
+      if (!hasPermission && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Storage permission required to proceed with upload.')),
+        );
+        return;
+      }
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Upload Assignment', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _assignmentTitleController,
+                  decoration: InputDecoration(
+                    labelText: 'Assignment Title',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  validator: (value) => value!.isEmpty ? 'Title is required' : null,
                 ),
-                validator: (value) => value!.isEmpty ? 'Title is required' : null,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[700],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[700],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () async {
+                    FilePickerResult? result = await FilePicker.platform.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'png'],
+                      allowCompression: true,
+                    );
+                    if (result != null && result.files.isNotEmpty) {
+                      setState(() {
+                        _selectedFile = result.files.first;
+                        print('File selected: ${_selectedFile!.name}, bytes: ${_selectedFile!.bytes?.length}');
+                      });
+                    } else {
+                      print('No file selected');
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('No file selected')),
+                        );
+                      }
+                    }
+                  },
+                  child: Text(
+                    _selectedFile == null ? 'Select File' : 'File Selected: ${_selectedFile!.name}',
+                    style: const TextStyle(color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'png'],
-                  );
-                  if (result != null) {
-                    setState(() {
-                      _selectedFile = File(result.files.single.path!);
-                    });
-                  }
-                },
-                child: Text(
-                  _selectedFile == null ? 'Select File' : 'File Selected: ${_selectedFile!.path.split('/').last}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[700],
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ],
             ),
-            onPressed: _selectedFile == null || _isUploading
-                ? null
-                : () => _uploadAssignment(studentId),
-            child: _isUploading
-                ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(color: Colors.white),
-            )
-                : const Text('Upload', style: TextStyle(color: Colors.white)),
           ),
-        ],
-      ),
-    );
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[700],
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: _isUploading ? null : () {
+                if (_formKey.currentState!.validate()) {
+                  _uploadAssignment(studentId);
+                }
+              },
+              child: _isUploading
+                  ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(color: Colors.white),
+              )
+                  : const Text('Upload', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Future<List<Map<String, dynamic>>> _getStudentAssignments(int studentId) async {
@@ -485,9 +564,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
           .order('uploaded_at', ascending: false);
       return (response as List).cast<Map<String, dynamic>>();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading assignments: $e')),
-      );
+      print('Error loading assignments: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading assignments: $e')),
+        );
+      }
       return [];
     }
   }
@@ -521,21 +603,29 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     child: ListTile(
-                      title: Text(assignment['title'], style: const TextStyle(fontWeight: FontWeight.w500)),
+                      title: Text(
+                        assignment['title'],
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: Text(
                         assignment['file_name'],
                         style: TextStyle(color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.download, color: Colors.blue),
                         onPressed: () async {
                           final url = assignment['file_url'];
-                          if (await canLaunchUrl(Uri.parse(url))) {
-                            await launchUrl(Uri.parse(url));
+                          final uri = Uri.parse(url);
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri, mode: LaunchMode.externalApplication);
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Cannot open file')),
-                            );
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Cannot open file')),
+                              );
+                            }
                           }
                         },
                       ),
@@ -567,6 +657,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
         elevation: 0,
         backgroundColor: Colors.blue[800],
         actions: [
+          IconButton(
+            icon: const Icon(Icons.assignment, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AssignmentsPage()),
+              );
+            },
+            tooltip: 'Manage Assignments',
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: _logout,
@@ -627,6 +727,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     title: Text(
                       student['name'],
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -635,10 +736,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         Text(
                           'Attendance: ${student['attendance']}%',
                           style: TextStyle(color: Colors.grey[600]),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         Text(
                           'Marks: ${student['marks']}',
                           style: TextStyle(color: Colors.grey[600]),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -691,5 +794,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
     _avatarController.dispose();
     _assignmentTitleController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openAppSettings() async {
+    await openAppSettings();
   }
 }
