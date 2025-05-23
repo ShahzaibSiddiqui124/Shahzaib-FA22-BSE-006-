@@ -30,7 +30,7 @@ class WelcomePage extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Manage student records efficiently',
-                style: TextTheme().bodyMedium?.copyWith(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                   fontSize: 16,
                 ),
@@ -43,7 +43,8 @@ class WelcomePage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[700],
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
                 ),
                 child: const Text(
                   'Get Started',

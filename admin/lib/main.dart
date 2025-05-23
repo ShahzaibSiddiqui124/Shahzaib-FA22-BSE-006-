@@ -1,65 +1,50 @@
 import 'package:flutter/material.dart';
-import 'supabase_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'welcome_page.dart';
-import 'admin_dashboard.dart';
-import 'assignments_page.dart';
+import 'dashboard.dart';
+import 'student_list.dart';
+import 'notifications_page.dart';
+import 'SubmissionsPage.dart';
+import 'reports_page.dart';
+import 'assignment_list.dart';
+import 'upload_assignment.dart';
+import 'marks_management.dart';
+import 'student_management.dart';
+import 'AttendanceManagement.dart'; // New module
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SupabaseConfig.initialize();
-  runApp(const AdminApp());
+  try {
+    await Supabase.initialize(
+      url: 'https://fyiashlxnnlquzzpkolq.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5aWFzaGx4bm5scXV6enBrb2xxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1NjYyMTQsImV4cCI6MjA2MzE0MjIxNH0.fTw10TQUxy56BmdsqCDGNnSsWpWoulUM2FHS_27sesc',
+    );
+  } catch (e) {
+    debugPrint('Supabase initialization failed: $e');
+  }
+  runApp(const MyApp());
 }
 
-class AdminApp extends StatelessWidget {
-  const AdminApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Student Admin Portal',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.grey[50],
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 16,
-            letterSpacing: 0, // Ensure no extra spacing between characters
-          ),
-          bodyLarge: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 18,
-            letterSpacing: 0,
-          ),
-          titleLarge: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0,
-          ),
-          headlineSmall: TextStyle(
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0,
-          ),
-        ).apply(
-          fontFamily: 'Roboto', // Fallback to ensure all text uses Roboto
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
-        ),
-        cardTheme: CardTheme(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      ),
+      title: 'Admin App',
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: const WelcomePage(),
       routes: {
-        '/dashboard': (context) => const AdminDashboard(),
-        '/assignments': (context) => const AssignmentsPage(),
+        '/dashboard': (_) => Dashboard(),
+        '/students': (_) => StudentList(),
+        '/notifications': (_) => NotificationsPage(),
+        '/submissions': (_) => SubmissionsPage(),
+        '/reports': (_) => ReportsPage(),
+        '/assignments': (_) => AssignmentList(),
+        '/upload-assignment': (_) => UploadAssignment(),
+        '/marks-management': (_) => MarksManagement(),
+        '/student-management': (_) => StudentManagement(),
+        '/attendance-management': (_) => AttendanceManagement(), // New route
       },
     );
   }
