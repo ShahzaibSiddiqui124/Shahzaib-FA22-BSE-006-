@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:clipboard/clipboard.dart'; // Import clipboard package
+import 'package:clipboard/clipboard.dart';
 import 'dart:io';
 
 class AssignmentsPage extends StatefulWidget {
@@ -61,7 +61,6 @@ class _AssignmentsPageState extends State<AssignmentsPage> {
         );
       }
     } else {
-      // Fallback: Show the URL and allow copying to clipboard
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Cannot launch URL. Copy the link to open manually.'),
@@ -130,6 +129,12 @@ class _AssignmentsPageState extends State<AssignmentsPage> {
     }
   }
 
+  bool isOverdue(String deadline) {
+    final deadlineDate = DateTime.parse(deadline);
+    final now = DateTime.now();
+    return now.isAfter(deadlineDate);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -149,76 +154,101 @@ class _AssignmentsPageState extends State<AssignmentsPage> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : assignments.isEmpty
-          ? const Center(child: Text('No assignments available'))
-          : ListView.builder(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        itemCount: assignments.length,
-        itemBuilder: (context, index) {
-          final assignment = assignments[index];
-          final assignmentId = assignment['id'].toString();
-          final hasSubmitted = submissions.any((sub) => sub['assignment_id'].toString() == assignmentId);
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : assignments.isEmpty
+            ? const Center(child: Text('No assignments available'))
+            : Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: assignments.length,
+              itemBuilder: (context, index) {
+                final assignment = assignments[index];
+                final assignmentId = assignment['id'].toString();
+                final hasSubmitted = submissions.any((sub) => sub['assignment_id'].toString() == assignmentId);
+                final isPastDeadline = isOverdue(assignment['deadline']);
 
-          return Card(
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    assignment['title'] ?? 'No Title',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    assignment['description'] ?? 'No Description',
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Deadline: ${assignment['deadline'].split('T')[0]}',
-                    style: const TextStyle(color: Colors.redAccent),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () => downloadAssignment(assignment['file_url']),
-                        icon: const Icon(Icons.download),
-                        label: const Text('Download'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                return Card(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          assignment['title'] ?? 'No Title',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: hasSubmitted
-                            ? null
-                            : () => uploadSubmission(assignmentId),
-                        icon: const Icon(Icons.upload),
-                        label: Text(hasSubmitted ? 'Submitted' : 'Upload Submission'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hasSubmitted ? Colors.grey : Colors.green,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                        const SizedBox(height: 8),
+                        Text(
+                          assignment['description'] ?? 'No Description',
+                          style: const TextStyle(color: Colors.grey),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          'Deadline: ${assignment['deadline'].split('T')[0]}',
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: ElevatedButton.icon(
+                                onPressed: () => downloadAssignment(assignment['file_url']),
+                                icon: const Icon(Icons.download),
+                                label: const Text('Download'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: ElevatedButton.icon(
+                                onPressed: (hasSubmitted || isPastDeadline)
+                                    ? null
+                                    : () => uploadSubmission(assignmentId),
+                                icon: const Icon(Icons.upload),
+                                label: Text(
+                                  hasSubmitted
+                                      ? 'Submitted'
+                                      : isPastDeadline
+                                      ? 'Overdue'
+                                      : 'Upload',
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: hasSubmitted
+                                      ? Colors.grey
+                                      : isPastDeadline
+                                      ? Colors.red
+                                      : Colors.green,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
