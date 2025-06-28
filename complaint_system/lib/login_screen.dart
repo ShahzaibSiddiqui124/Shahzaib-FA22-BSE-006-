@@ -43,13 +43,23 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid credentials'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Invalid credentials', style: GoogleFonts.poppins()),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
         );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Login failed: $e', style: GoogleFonts.poppins()),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -66,28 +76,48 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.blue, Colors.purple],
+            colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)], // Professional blue-purple gradient
           ),
         ),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(size.width * 0.06),
+              padding: EdgeInsets.symmetric(horizontal: size.width * 0.06, vertical: size.height * 0.02),
               child: Card(
-                elevation: 8,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                child: Padding(
+                elevation: 10,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                color: Colors.white.withOpacity(0.95), // Slight transparency for glassmorphism
+                child: Container(
                   padding: EdgeInsets.all(size.width * 0.08),
+                  constraints: BoxConstraints(maxWidth: 400), // Limit card width for large screens
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.admin_panel_settings, size: 80, color: Colors.blue),
-                        SizedBox(height: size.height * 0.03),
+                        Icon(
+                          Icons.admin_panel_settings,
+                          size: 70,
+                          color: const Color(0xFF3B82F6),
+                        ),
+                        SizedBox(height: size.height * 0.02),
                         Text(
                           'Complaint Management System',
-                          style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
+                          style: GoogleFonts.poppins(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1E3A8A), // Dark blue for contrast
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: size.height * 0.04),
@@ -95,37 +125,85 @@ class _LoginScreenState extends State<LoginScreen> {
                           value: _selectedRole,
                           decoration: InputDecoration(
                             labelText: 'Login as',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.person),
+                            labelStyle: GoogleFonts.poppins(color: Colors.grey[600]),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                            ),
+                            prefixIcon: const Icon(Icons.person, color: Color(0xFF3B82F6)),
                           ),
                           items: UserRole.values.map((role) {
                             return DropdownMenuItem(
                               value: role,
-                              child: Text(role.toString().split('.').last.toUpperCase(), style: GoogleFonts.poppins()),
+                              child: Text(
+                                role.toString().split('.').last.toUpperCase(),
+                                style: GoogleFonts.poppins(fontSize: 14),
+                              ),
                             );
                           }).toList(),
                           onChanged: (value) => setState(() => _selectedRole = value!),
                         ),
-                        SizedBox(height: size.height * 0.02),
+                        SizedBox(height: size.height * 0.025),
                         TextFormField(
                           controller: _usernameController,
                           decoration: InputDecoration(
                             labelText: 'Username',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.email),
+                            labelStyle: GoogleFonts.poppins(color: Colors.grey[600]),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                            ),
+                            prefixIcon: const Icon(Icons.email, color: Color(0xFF3B82F6)),
                           ),
                           validator: (value) => value!.isEmpty ? 'Please enter username' : null,
                         ),
-                        SizedBox(height: size.height * 0.02),
+                        SizedBox(height: size.height * 0.025),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.lock),
+                            labelStyle: GoogleFonts.poppins(color: Colors.grey[600]),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                            ),
+                            prefixIcon: const Icon(Icons.lock, color: Color(0xFF3B82F6)),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                              icon: Icon(
+                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                color: Colors.grey[600],
+                              ),
                               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                             ),
                           ),
@@ -136,30 +214,61 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _login,
-                            child: _isLoading
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : Text('Login', style: GoogleFonts.poppins(fontSize: 16)),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              alignment: Alignment.center,
+                              child: _isLoading
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : Text(
+                                'Login',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         if (_selectedRole == UserRole.admin) ...[
-                          SizedBox(height: size.height * 0.02),
+                          SizedBox(height: size.height * 0.025),
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                              color: Colors.blue[50],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.blue.withOpacity(0.2)),
                             ),
                             child: Column(
                               children: [
                                 Text(
-                                  'Admin Credentials:',
-                                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.blue),
+                                  'Admin Credentials',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1E3A8A),
+                                  ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 8),
                                 Text(
                                   'Username: admin01@\nPassword: admin1122',
-                                  style: GoogleFonts.poppins(fontSize: 12),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    color: Colors.grey[700],
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ],

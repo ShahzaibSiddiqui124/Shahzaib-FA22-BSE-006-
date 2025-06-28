@@ -22,6 +22,7 @@ class WelcomePage extends StatelessWidget {
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center, // Ensure horizontal centering
               children: [
                 Lottie.asset(
                   'assets/Animation - 1750150035410.json',
@@ -32,6 +33,7 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 Text(
                   'Smart Complaint Management',
+                  textAlign: TextAlign.center, // Explicitly center text
                   style: GoogleFonts.poppins(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -41,6 +43,7 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   'Resolve issues efficiently',
+                  textAlign: TextAlign.center, // Explicitly center text
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     color: Colors.white70,

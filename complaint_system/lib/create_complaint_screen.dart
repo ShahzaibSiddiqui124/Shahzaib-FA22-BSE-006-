@@ -21,6 +21,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   List<AppUser> _availableReceivers = [];
   bool _isLoading = true;
   bool _isSubmitting = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -54,7 +56,12 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading receivers: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error loading receivers: $e', style: GoogleFonts.poppins()),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
       setState(() => _isLoading = false);
     }
@@ -64,7 +71,12 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     if (!_formKey.currentState!.validate() || _selectedReceiver == null) {
       if (_selectedReceiver == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a receiver'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Please select a receiver', style: GoogleFonts.poppins()),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
         );
       }
       return;
@@ -85,8 +97,13 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? 'Complaint submitted successfully!' : 'Failed to submit complaint.'),
-          backgroundColor: success ? Colors.green : Colors.red,
+          content: Text(
+            success ? 'Complaint submitted successfully!' : 'Failed to submit complaint.',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: success ? Colors.green[600] : Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
 
@@ -94,7 +111,12 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error: $e', style: GoogleFonts.poppins()),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -104,115 +126,255 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final viewInsets = MediaQuery.of(context).viewInsets;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Complaint', style: GoogleFonts.poppins()),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue, Colors.purple],
+        title: Text(
+          'Create Complaint',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(size.width * 0.04),
-            child: Card(
-              elevation: 8,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: EdgeInsets.all(size.width * 0.06),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Submit New Complaint',
-                        style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
-                      ),
-                      SizedBox(height: size.height * 0.03),
-                      TextFormField(
-                        controller: _titleController,
-                        decoration: InputDecoration(
-                          labelText: 'Complaint Title',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                          prefixIcon: const Icon(Icons.title),
+        backgroundColor: const Color(0xFF3B82F6),
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.2),
+      ),
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding: EdgeInsets.symmetric(
+                horizontal: size.width * 0.06,
+                vertical: viewInsets.bottom > 0 ? 8.0 : size.height * 0.02,
+              ),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: size.height - MediaQuery.of(context).padding.vertical,
+                ),
+                child: Card(
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  color: Colors.white.withOpacity(0.95),
+                  child: Container(
+                    padding: EdgeInsets.all(size.width * 0.05),
+                    constraints: BoxConstraints(
+                      maxWidth: 400,
+                      minHeight: viewInsets.bottom > 0 ? size.height * 0.7 : 0,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         ),
-                        validator: (value) => value!.isEmpty ? 'Please enter complaint title' : null,
-                      ),
-                      SizedBox(height: size.height * 0.02),
-                      if (_isLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else if (_availableReceivers.isEmpty)
-                        Card(
-                          color: Colors.orange,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              'No available receivers found',
-                              style: GoogleFonts.poppins(color: Colors.white),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Submit New Complaint',
+                            style: GoogleFonts.poppins(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1E3A8A),
                             ),
                           ),
-                        )
-                      else
-                        DropdownButtonFormField<AppUser>(
-                          value: _selectedReceiver,
-                          decoration: InputDecoration(
-                            labelText: 'Send to',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            prefixIcon: const Icon(Icons.person),
-                          ),
-                          items: _availableReceivers.map((user) {
-                            return DropdownMenuItem(
-                              value: user,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(user.name, style: GoogleFonts.poppins()),
-                                  Text(
-                                    '${user.role.toString().split('.').last.toUpperCase()} - ${user.email}',
-                                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-                                  ),
-                                ],
+                          SizedBox(height: size.height * 0.03),
+                          TextFormField(
+                            controller: _titleController,
+                            maxLines: 1,
+                            decoration: InputDecoration(
+                              labelText: 'Complaint Title',
+                              labelStyle: GoogleFonts.poppins(color: Colors.grey[600]),
+                              filled: true,
+                              fillColor: Colors.grey[50],
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
                               ),
-                            );
-                          }).toList(),
-                          onChanged: (value) => setState(() => _selectedReceiver = value),
-                        ),
-                      SizedBox(height: size.height * 0.02),
-                      TextFormField(
-                        controller: _descriptionController,
-                        maxLines: 5,
-                        decoration: InputDecoration(
-                          labelText: 'Description',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                          prefixIcon: const Icon(Icons.description),
-                          alignLabelWithHint: true,
-                        ),
-                        validator: (value) {
-                          if (value!.isEmpty) return 'Please enter complaint description';
-                          if (value.length < 10) return 'Description must be at least 10 characters';
-                          return null;
-                        },
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                              ),
+                              prefixIcon: const Icon(Icons.title, color: Color(0xFF3B82F6)),
+                            ),
+                            validator: (value) => value!.isEmpty ? 'Please enter complaint title' : null,
+                          ),
+                          SizedBox(height: size.height * 0.025),
+                          if (_isLoading)
+                            const Center(child: CircularProgressIndicator(color: Color(0xFF3B82F6)))
+                          else if (_availableReceivers.isEmpty)
+                            Card(
+                              color: Colors.orange[50],
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text(
+                                  'No available receivers found',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.orange[800],
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: size.width * 0.8,
+                                maxHeight: size.height * 0.3,
+                              ),
+                              child: SingleChildScrollView(
+                                child: DropdownButtonFormField<AppUser>(
+                                  value: _selectedReceiver,
+                                  decoration: InputDecoration(
+                                    labelText: 'Send to',
+                                    labelStyle: GoogleFonts.poppins(color: Colors.grey[600]),
+                                    filled: true,
+                                    fillColor: Colors.grey[50],
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                                    ),
+                                    prefixIcon: const Icon(Icons.person, color: Color(0xFF3B82F6)),
+                                  ),
+                                  items: _availableReceivers.map((user) {
+                                    return DropdownMenuItem<AppUser>(
+                                      value: user,
+                                      child: Text.rich(
+                                        TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text: user.name,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 14,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: ' | ${user.role.toString().split('.').last.toUpperCase()} - ${user.email}',
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 12,
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) => setState(() => _selectedReceiver = value),
+                                ),
+                              ),
+                            ),
+                          SizedBox(height: size.height * 0.025),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(maxHeight: size.height * 0.3),
+                            child: SingleChildScrollView(
+                              child: TextFormField(
+                                controller: _descriptionController,
+                                maxLines: null,
+                                minLines: 3,
+                                decoration: InputDecoration(
+                                  labelText: 'Description',
+                                  labelStyle: GoogleFonts.poppins(color: Colors.grey[600]),
+                                  filled: true,
+                                  fillColor: Colors.grey[50],
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: Colors.grey[300]!),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: Colors.grey[300]!),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                                  ),
+                                  prefixIcon: const Icon(Icons.description, color: Color(0xFF3B82F6)),
+                                  alignLabelWithHint: true,
+                                ),
+                                validator: (value) {
+                                  if (value!.isEmpty) return 'Please enter complaint description';
+                                  if (value.length < 10) return 'Description must be at least 10 characters';
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: size.height * 0.03),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isSubmitting || _isLoading ? null : _submitComplaint,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                alignment: Alignment.center,
+                                child: _isSubmitting
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : Text(
+                                  'Submit Complaint',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: size.height * 0.03),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isSubmitting || _isLoading ? null : _submitComplaint,
-                          child: _isSubmitting
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : Text('Submit Complaint', style: GoogleFonts.poppins(fontSize: 16)),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),

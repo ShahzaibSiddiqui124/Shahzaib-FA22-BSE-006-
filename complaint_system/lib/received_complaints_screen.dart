@@ -37,7 +37,12 @@ class _ReceivedComplaintsScreenState extends State<ReceivedComplaintsScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading complaints: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error loading complaints: $e', style: GoogleFonts.poppins()),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
       setState(() => _isLoading = false);
     }
@@ -52,11 +57,22 @@ class _ReceivedComplaintsScreenState extends State<ReceivedComplaintsScreen> {
   Color _getStatusColor(ComplaintStatus status) {
     switch (status) {
       case ComplaintStatus.pending:
-        return Colors.orange;
+        return Colors.orange[600]!;
       case ComplaintStatus.solved:
-        return Colors.green;
+        return Colors.green[600]!;
       case ComplaintStatus.rejected:
-        return Colors.red;
+        return Colors.redAccent;
+    }
+  }
+
+  IconData _getStatusIcon(ComplaintStatus status) {
+    switch (status) {
+      case ComplaintStatus.pending:
+        return Icons.schedule;
+      case ComplaintStatus.solved:
+        return Icons.check_circle;
+      case ComplaintStatus.rejected:
+        return Icons.cancel;
     }
   }
 
@@ -70,15 +86,25 @@ class _ReceivedComplaintsScreenState extends State<ReceivedComplaintsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Complaint marked as ${newStatus.toString().split('.').last}'),
-          backgroundColor: Colors.green,
+          content: Text(
+            'Complaint marked as ${newStatus.toString().split('.').last}',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.green[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       if (success) _loadComplaints();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error: $e', style: GoogleFonts.poppins()),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
     }
   }
@@ -87,21 +113,30 @@ class _ReceivedComplaintsScreenState extends State<ReceivedComplaintsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Update Complaint Status', style: GoogleFonts.poppins()),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.white.withOpacity(0.95),
+        title: Text(
+          'Update Complaint Status',
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1E3A8A),
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.check_circle, color: Colors.green),
-              title: Text('Mark as Solved', style: GoogleFonts.poppins()),
+              title: Text('Mark as Solved', style: GoogleFonts.poppins(fontSize: 14)),
               onTap: () {
                 Navigator.pop(context);
                 _updateComplaintStatus(complaint, ComplaintStatus.solved);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.cancel, color: Colors.red),
-              title: Text('Mark as Rejected', style: GoogleFonts.poppins()),
+              leading: const Icon(Icons.cancel, color: Colors.redAccent),
+              title: Text('Mark as Rejected', style: GoogleFonts.poppins(fontSize: 14)),
               onTap: () {
                 Navigator.pop(context);
                 _updateComplaintStatus(complaint, ComplaintStatus.rejected);
@@ -112,7 +147,14 @@ class _ReceivedComplaintsScreenState extends State<ReceivedComplaintsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: GoogleFonts.poppins()),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: const Color(0xFF3B82F6),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -125,155 +167,274 @@ class _ReceivedComplaintsScreenState extends State<ReceivedComplaintsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Received Complaints', style: GoogleFonts.poppins()),
-        backgroundColor: Colors.blue,
+        title: Text(
+          'Received Complaints',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF3B82F6),
         foregroundColor: Colors.white,
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.2),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadComplaints),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _loadComplaints,
+            tooltip: 'Refresh',
+          ),
         ],
       ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue, Colors.purple],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
           ),
         ),
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(size.width * 0.04),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Filter by Status:',
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          FilterChip(
-                            label: Text('All', style: GoogleFonts.poppins()),
-                            selected: _filterStatus == null,
-                            onSelected: (selected) => setState(() => _filterStatus = null),
-                          ),
-                          ...ComplaintStatus.values.map((status) {
-                            return FilterChip(
-                              label: Text(status.toString().split('.').last.toUpperCase(), style: GoogleFonts.poppins()),
-                              selected: _filterStatus == status,
-                              onSelected: (selected) => setState(() => _filterStatus = selected ? status : null),
-                            );
-                          }),
-                        ],
-                      ),
-                    ],
-                  ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.width * 0.06,
+                  vertical: size.height * 0.02,
                 ),
-              ),
-            ),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _filteredComplaints.isEmpty
-                  ? Center(child: Text('No complaints found', style: GoogleFonts.poppins(fontSize: 18)))
-                  : ListView.builder(
-                padding: EdgeInsets.all(size.width * 0.04),
-                itemCount: _filteredComplaints.length,
-                itemBuilder: (context, index) {
-                  final complaint = _filteredComplaints[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ExpansionTile(
-                      leading: CircleAvatar(
-                        backgroundColor: _getStatusColor(complaint.status),
-                        child: Icon(_getStatusIcon(complaint.status), color: Colors.white),
-                      ),
-                      title: Text(complaint.title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('From: ${complaint.senderName}', style: GoogleFonts.poppins()),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(complaint.status).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: _getStatusColor(complaint.status)),
-                            ),
-                            child: Text(
-                              complaint.status.toString().split('.').last.toUpperCase(),
-                              style: GoogleFonts.poppins(
-                                color: _getStatusColor(complaint.status),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Description:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
-                              const SizedBox(height: 8),
-                              Text(complaint.description, style: GoogleFonts.poppins()),
-                              const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Created: ${DateFormat('dd/MM/yyyy HH:mm').format(complaint.createdAt)}',
-                                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-                                  ),
-                                  if (complaint.updatedAt != null)
-                                    Text(
-                                      'Updated: ${DateFormat('dd/MM/yyyy HH:mm').format(complaint.updatedAt!)}',
-                                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-                                    ),
-                                ],
-                              ),
-                              if (complaint.status == ComplaintStatus.pending)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 16),
-                                  child: ElevatedButton.icon(
-                                    onPressed: () => _showStatusUpdateDialog(complaint),
-                                    icon: const Icon(Icons.edit),
-                                    label: Text('Update Status', style: GoogleFonts.poppins()),
-                                  ),
-                                ),
-                            ],
-                          ),
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Card(
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  color: Colors.white.withOpacity(0.95), // Glassmorphism effect
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    constraints: const BoxConstraints(maxWidth: 400), // Prevent overflow
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         ),
                       ],
                     ),
-                  );
-                },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Filter by Status:',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1E3A8A),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            FilterChip(
+                              label: Text('All', style: GoogleFonts.poppins(fontSize: 14)),
+                              selected: _filterStatus == null,
+                              selectedColor: const Color(0xFF3B82F6).withOpacity(0.2),
+                              checkmarkColor: const Color(0xFF3B82F6),
+                              labelStyle: GoogleFonts.poppins(
+                                color: _filterStatus == null ? const Color(0xFF3B82F6) : Colors.grey[600],
+                              ),
+                              backgroundColor: Colors.grey[50],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.grey[300]!),
+                              ),
+                              onSelected: (selected) => setState(() => _filterStatus = null),
+                            ),
+                            ...ComplaintStatus.values.map((status) {
+                              return FilterChip(
+                                label: Text(
+                                  status.toString().split('.').last.toUpperCase(),
+                                  style: GoogleFonts.poppins(fontSize: 14),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                selected: _filterStatus == status,
+                                selectedColor: _getStatusColor(status).withOpacity(0.2),
+                                checkmarkColor: _getStatusColor(status),
+                                labelStyle: GoogleFonts.poppins(
+                                  color: _filterStatus == status ? _getStatusColor(status) : Colors.grey[600],
+                                ),
+                                backgroundColor: Colors.grey[50],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(color: _getStatusColor(status).withOpacity(0.3)),
+                                ),
+                                onSelected: (selected) => setState(() => _filterStatus = selected ? status : null),
+                              );
+                            }),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Color(0xFF3B82F6)))
+                    : _filteredComplaints.isEmpty
+                    ? Center(
+                  child: Text(
+                    'No complaints found',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+                    : ListView.builder(
+                  padding: EdgeInsets.all(size.width * 0.06),
+                  itemCount: _filteredComplaints.length,
+                  itemBuilder: (context, index) {
+                    final complaint = _filteredComplaints[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      elevation: 6,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      color: Colors.white.withOpacity(0.95),
+                      child: ExpansionTile(
+                        leading: CircleAvatar(
+                          radius: 24,
+                          backgroundColor: _getStatusColor(complaint.status).withOpacity(0.1),
+                          child: Icon(
+                            _getStatusIcon(complaint.status),
+                            color: _getStatusColor(complaint.status),
+                            size: 24,
+                          ),
+                        ),
+                        title: Text(
+                          complaint.title,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1E3A8A),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'From: ${complaint.senderName}',
+                              style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(complaint.status).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: _getStatusColor(complaint.status).withOpacity(0.3)),
+                              ),
+                              child: Text(
+                                complaint.status.toString().split('.').last.toUpperCase(),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: _getStatusColor(complaint.status),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Description:',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1E3A8A),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  complaint.description,
+                                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700]),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Created: ${DateFormat('dd/MM/yyyy HH:mm').format(complaint.createdAt)}',
+                                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                                    ),
+                                    if (complaint.updatedAt != null)
+                                      Text(
+                                        'Updated: ${DateFormat('dd/MM/yyyy HH:mm').format(complaint.updatedAt!)}',
+                                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+                                      ),
+                                  ],
+                                ),
+                                if (complaint.status == ComplaintStatus.pending)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 12),
+                                    child: SizedBox(
+                                      width: double.infinity, // Ensure button fits within card
+                                      child: ElevatedButton(
+                                        onPressed: () => _showStatusUpdateDialog(complaint),
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            gradient: const LinearGradient(
+                                              colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            'Update Status',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  IconData _getStatusIcon(ComplaintStatus status) {
-    switch (status) {
-      case ComplaintStatus.pending:
-        return Icons.schedule;
-      case ComplaintStatus.solved:
-        return Icons.check_circle;
-      case ComplaintStatus.rejected:
-        return Icons.cancel;
-    }
   }
 }
