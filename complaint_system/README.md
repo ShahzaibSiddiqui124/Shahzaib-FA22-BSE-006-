@@ -12,5 +12,12 @@
  <img src="https://github.com/user-attachments/assets/01f6b860-7470-417e-b41e-523dfcaa2944" alt="Teacher 3" width="300"> 
  <img src="https://github.com/user-attachments/assets/00aa28a2-cdb1-43a8-9008-70c0620f6cdf" alt="Teacher 4" width="300"> 
 </div>
+<div style="display: flex; align-items: center;">
+ <img src="https://github.com/user-attachments/assets/a96571c2-d1ea-449b-a35c-691b954b0107" alt="Hod 1" width="300"> 
+<img src="https://github.com/user-attachments/assets/d6d93205-5b52-4552-8f08-f25cac4553c5" alt="Hod 2" width="300"> 
+<img src="https://github.com/user-attachments/assets/5e740a8c-02c9-4608-920d-a9b9a1f065a0" alt="Hod 3" width="300"> 
+<img src="https://github.com/user-attachments/assets/96f1f79f-a4ed-453a-90e2-9e83105736eb" alt="Hod 4" width="300"> 
+<img src="https://github.com/user-attachments/assets/dd00bc1c-a0bf-4cb7-86e7-05d29db56e06" alt="Hod 5" width="300"> 
 
+</div>
 
