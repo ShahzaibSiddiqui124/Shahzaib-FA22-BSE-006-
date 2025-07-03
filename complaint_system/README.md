@@ -25,7 +25,10 @@
 <img src="https://github.com/user-attachments/assets/1ff8eea1-72a1-438c-8006-9ac6c59739f0" alt="Admin 3" width="300"> 
 <img src="https://github.com/user-attachments/assets/4637b6a0-1a74-49fb-9580-9c6839cd2df4" alt="Admin 4" width="300"> 
 <img src="https://github.com/user-attachments/assets/08140ac3-3288-47c4-94a8-7c82976609bc" alt="Admin 5" width="300"> 
-<img src="https://github.com/user-attachments/assets/640b330f-0aa6-4e21-b20a-7664628310cf" alt="Admin 6" width="300"> 
+<img src="https://github.com/user-attachments/assets/640b330f-0aa6-4e21-b20a-7664628310cf" alt="Admin 6" width="300">
+<img src="https://github.com/user-attachments/assets/e721f63d-1c74-48ac-a5c6-7931287c1f0a" alt="screenshot 1" width="300">
+<img src="https://github.com/user-attachments/assets/a4b9ef18-8d55-4f2d-b26f-7861e373795d" alt="screenshot 2" width="300">
+ 
 
 </div>
 
